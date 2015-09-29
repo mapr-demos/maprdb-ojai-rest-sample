@@ -1,0 +1,47 @@
+<div class="container">
+
+
+    <div class="row">
+        <div class="span12">
+            <h2>{{ entry.first_name }} {{ entry.last_name }}</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span6">
+            <b>Age:</b> {{entry.age}}
+        </div>
+
+        <div class="span6" ng-show="entry.addresses">
+            <b>Addresses:</b>
+            <ul ng-repeat="add in entry.addresses">
+                <li><b>{{add.type}}</li></b> : {{add.line}} {{add.city}} {{add.zip}}  </li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span12">&nbsp;</div>
+    </div>
+
+    <div class="row">
+        <div class="span6">
+            Tags :
+            <span ng-repeat="interest in entry.interests">
+                {{interest}}
+            </span>
+        </div>
+    </div>
+
+
+
+    <div class="form-actions">
+        <a href="#/users/edit/{{entry._id}}" class="btn btn-primary"  >Edit</a>
+        <a href="#/users/" class="btn"  >List</a>
+    </div>
+
+
+
+</div>
+
+

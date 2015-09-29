@@ -1,0 +1,47 @@
+<div class="container">
+
+
+    <form class="form-horizontal">
+
+        <div class="control-group">
+            <label class="control-label" for="title">Title</label>
+            <div class="controls">
+                <input type="text" id="title" placeholder="title" ng-model="entry.title" class="input-xxlarge">
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="title">Content</label>
+            <div class="controls">
+                <textarea id="content" placeholder="content" ng-model="entry.content" class="input-xxlarge" rows="7" />
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="title">Author</label>
+            <div class="controls">
+                <select required ng-model="entry.author" ng-options="auth.name for auth in authorList" class="form-control" >
+                </select>
+            </div>
+        </div>
+
+
+
+        <div class="control-group">
+            <div class="span4"></div>
+            <div class="span4">
+                <button type="submit" class="btn btn-default" ng-click="save()" >Save</button>
+                <button type="button" class="btn ">Cancel</button>
+            </div>
+            <div class="span4"></div>
+        </div>
+    </form>
+
+
+    {{ entry }}
+
+
+
+</div>
+
+

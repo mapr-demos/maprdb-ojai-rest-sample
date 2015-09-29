@@ -1,0 +1,19 @@
+{
+  "_id" : "001-003-ABC",
+  "first_name" : "John",
+  "last_name" : "Doe",
+  "email" : "jdoe@doe.com",
+  "dob" : "1970-04-23",
+  "interests" : ["sports", "movies", "electronics"],
+  "address" : {
+    "street" : "1212 Maple Street",
+    "city" : "San Jose",
+    "state" : "CA",
+    "zip" : "95101",
+    "country" : "USA"
+  },
+  "sessions" : [
+    { "id" : "CoD4" , "last" : "2015-08-15-22:00", "time" : 145023 },
+    {"id" : "fifa14" , "last" : "2015-08-15-22:00", "time" : 234023 }
+  ]
+}

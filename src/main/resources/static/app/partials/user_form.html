@@ -1,0 +1,48 @@
+
+<form class="form-horizontal" method="post" id="speakerForm" name="speakerForm">
+
+
+    <fieldset>
+        <legend>User Information</legend>
+
+        <div class="control-group" ng-show="newUser">
+            <label class="control-label" for="_id">Id</label>
+            <div class="controls">
+                <input ng-model="entry._id" type="text" class="input-small" id="_id" name="_id" autocomplete="off" >
+            </div>
+        </div>
+
+
+        <div class="control-group">
+            <label class="control-label" for="first_name">First Name</label>
+            <div class="controls">
+                <input ng-model="entry.first_name" type="text" class="input-xlarge" id="first_name" name="first_name" autocomplete="off" >
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="last_name">Last Name</label>
+            <div class="controls">
+                <input ng-model="entry.last_name" type="text" class="input-xlarge" id="last_name" name="last_name" autocomplete="off" >
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="age">Age</label>
+            <div class="controls">
+                <input ng-model="entry.age" type="text" class="input-small" id="age" name="age" autocomplete="off" >
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" ng-click="save()" class="btn btn-primary" id="actionSave" name="action"  value="save" >Save changes</button>
+            <button type="submit" ng-click="delete()" value="delete" id="actionDelete" name="action" class="btn">Delete</button>
+        </div>
+
+    </fieldset>
+
+
+    {{entry}}
+
+
+</form>

@@ -1,0 +1,27 @@
+<div class="container">
+
+
+    <div class="row">
+        <div class="span12">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Id</th>
+                    <th>First Name</th>
+                    <th>Last Name</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="entry in entries">
+                    <td><a href="#/users/{{entry._id}}">{{entry._id}}</a></td>
+                    <td><a href="#/users/{{entry._id}}">{{entry.firstName}}</a></td>
+                    <td><a href="#/users/{{entry._id}}">{{entry.lastName}}</a></td>
+                </tr>
+                <tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+

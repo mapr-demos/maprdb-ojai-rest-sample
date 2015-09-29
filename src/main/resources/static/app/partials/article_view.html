@@ -1,0 +1,57 @@
+<div class="container">
+
+
+    <div class="row">
+        <div class="span12">
+            <h2>{{ entry.title }}</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span8">
+            {{ entry.content }}
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span8">
+            &nbsp;
+        </div>
+    </div>
+
+
+    <div class="row">
+        <div class="span6">
+            by {{ entry.author.name }} on {{ entry.createdAt }}
+        </div>
+        <div class="span4">
+        </div>
+        <div class="span4">
+            <span ng-repeat="tag in entry.tags">
+                <a href="#/articles?tag={{tag}}">
+                <button  type="button" class="btn btn-info btn-xs">{{tag}}</button>
+                </a>
+            </span>
+
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span8">
+            &nbsp;
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="span4" >
+            <button  type="button" class="btn btn-xs" ng-click="likeIt()">
+                {{ entry.likes && entry.likes || 0 }} like(s)
+            </button>
+        </div>
+    </div>
+
+
+
+</div>
+
+

@@ -1,0 +1,43 @@
+<div class="container">
+
+
+    <div class="row">
+        <div class="span12">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Tags</th>
+                    <th>Author</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr ng-repeat="entry in entries">
+                    <td>
+                        <a href="#/articles/{{entry._id}}">
+                        {{entry.title}} ({{entry.createdAt}})
+                        </a>
+                    </td>
+                    <td>
+                        <a ng-repeat="tag in entry.tags" href="#/articles?tag={{tag}}">
+                            {{tag}}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="#/users/{{entry._id}}">
+                            {{entry.author.name}}
+                        </a>
+                    </td>
+                </tr>
+                <tbody>
+            </table>
+        </div>
+    </div>
+
+
+
+    <div class="form-actions">
+        <a href="#/articles/edit/" class="btn"  >New Article</a>
+    </div>
+
+</div>
