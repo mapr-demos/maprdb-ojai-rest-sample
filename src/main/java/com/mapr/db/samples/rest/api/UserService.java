@@ -224,11 +224,13 @@ public class UserService {
   @GET
   @Path("/")
   @ApiOperation(value = "Return all users.<br/> See how to get all document and do a projection")
-  public Response getusers() throws IOException {
+  public Response getusers() throws Exception {
 
     List<Map<String, Map>> users = new ArrayList<Map<String, Map>>();
-    for (DBDocument document : table.find("_id", "first_name", "last_name")) {
-      users.add(JSONHelper.toMap(document));
+    try(DocumentStream<DBDocument> stream = table.find("_id", "first_name", "last_name") ) {
+      for (DBDocument document : stream) {
+        users.add(JSONHelper.toMap(document));
+      }
     }
 
     return Response.ok(users).build();
@@ -237,7 +239,7 @@ public class UserService {
   @GET
   @Path("/by_age/{age}")
   @ApiOperation(value = "Find User by Age.<br/>This operation shows how to query document on a specific field")
-  public Response getusersByAge(@PathParam("age") int age) throws IOException {
+  public Response getusersByAge(@PathParam("age") int age) throws Exception {
     List<Map<String, ObjectMapper>> users = new ArrayList<Map<String, ObjectMapper>>();
 
     // Create a condition
@@ -246,8 +248,10 @@ public class UserService {
             .is("age", EQUAL, age)
             .build();
 
-    for (DBDocument document : table.find(condition)) {
-      users.add(JSONHelper.toMap(document));
+    try(DocumentStream<DBDocument> stream = table.find(condition) ) {
+      for (DBDocument document : stream) {
+        users.add(JSONHelper.toMap(document));
+      }
     }
     return Response.ok(users).build();
 
@@ -257,7 +261,7 @@ public class UserService {
   @GET
   @Path("/by_interest/{interest}")
   @ApiOperation(value = "Find User by Interest.<br/>This operation shows how to query document on a specific field")
-  public Response getusersByAge(@PathParam("interest") String interest) throws IOException {
+  public Response getusersByAge(@PathParam("interest") String interest) throws Exception {
 
     List<Map<String, Map>> users = new ArrayList<Map<String, Map>>();
     List<String> results = new ArrayList<String>();
@@ -271,8 +275,10 @@ public class UserService {
             .close()
             .build();
 
-    for (DBDocument document : table.find(condition)) {
-      users.add(JSONHelper.toMap(document));
+    try(DocumentStream<DBDocument> stream = table.find(condition) ) {
+      for (DBDocument document : stream) {
+        users.add(JSONHelper.toMap(document));
+      }
     }
 
     return Response.ok(users).build();

@@ -66,10 +66,12 @@ public class ArticleService {
   @GET
   @Path("/")
   @ApiOperation(value = "Return all articles.<br/> See how to get all document")
-  public Response getArticles() throws IOException {
+  public Response getArticles() throws Exception {
     List<Map<String, Map>> items = new ArrayList<Map<String, Map>>();
-    for (DBDocument document : table.find()) {
-      items.add(JSONHelper.toMap(document));
+    try(DocumentStream<DBDocument> stream = table.find() ) {
+      for (DBDocument document : stream) {
+        items.add(JSONHelper.toMap(document));
+      }
     }
     return Response.ok(items).build();
   }
@@ -152,7 +154,7 @@ public class ArticleService {
   @GET
   @Path("/by_tag/{tag}")
   @ApiOperation(value = "Find Articles by Tag.<br/>This operation shows how to query document on a specific field")
-  public Response getArticlesByTag(@PathParam("tag") String tag) throws IOException {
+  public Response getArticlesByTag(@PathParam("tag") String tag) throws Exception {
 
     List<Map<String, Map>> articles = new ArrayList<Map<String, Map>>();
 
@@ -164,9 +166,10 @@ public class ArticleService {
             .is("tags", EQUAL, tag) // search in case it is a scalar
             .close()
             .build();
-
-    for (DBDocument document : table.find(condition)) {
-      articles.add(JSONHelper.toMap(document));
+    try(DocumentStream<DBDocument> stream = table.find(condition) ) {
+      for (DBDocument document : stream) {
+        articles.add(JSONHelper.toMap(document));
+      }
     }
 
 
