@@ -1,14 +1,10 @@
 package com.mapr.db.samples.rest.api;
 
-import static com.mapr.db.Condition.Op.EQUAL;
+import static org.ojai.store.QueryCondition.Op.EQUAL;
 
-import com.mapr.db.Condition;
-import com.mapr.db.DBDocument;
 import com.mapr.db.MapRDB;
-import com.mapr.db.Mutation;
 import com.mapr.db.Table;
 
-import com.mapr.db.samples.rest.helper.JSONHelper;
 import com.mapr.db.samples.rest.helper.MaprDBHelper;
 import com.mapr.db.samples.rest.model.Address;
 import com.mapr.db.samples.rest.model.User;
@@ -17,8 +13,8 @@ import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import org.ojai.Document;
 import org.ojai.DocumentStream;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.ojai.json.Json;
+import org.ojai.store.DocumentMutation;
+import org.ojai.store.QueryCondition;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -66,7 +62,7 @@ public class UserService {
 
     table.insertOrReplace(custRecord);
     table.flush();
-    return Response.created(new URI("/api/users/" + ((DBDocument)custRecord).getIdString())).build();
+    return Response.created(new URI("/api/users/" + ((Document)custRecord).getIdString())).build();
   }
 
   @PUT
@@ -78,7 +74,7 @@ public class UserService {
     Document custRecord = MapRDB.newDocument(user);
     table.insertOrReplace(custRecord);
     table.flush();
-    return Response.created(new URI("/api/users/" + ((DBDocument)custRecord).getIdString() )).build();
+    return Response.created(new URI("/api/users/" + ((Document)custRecord).getIdString() )).build();
   }
 
   @POST
@@ -89,9 +85,9 @@ public class UserService {
           @PathParam("value") String value) throws IOException {
 
     // The following code will udpate the user document and add/append an interest
-    Mutation mutation = MapRDB.newMutation()
-            .setOrReplace("nick_name", value)
-            .build();
+    DocumentMutation mutation = MapRDB.newMutation()
+            .setOrReplace("nick_name", value);
+
     table.update(id, mutation);
     table.flush();
     return Response.ok().build();
@@ -105,9 +101,9 @@ public class UserService {
           @PathParam("id") String id) throws IOException {
 
     // The following code will udpate the user document and add/append an interest
-    Mutation mutation = MapRDB.newMutation()
-            .delete("nick_name")
-            .build();
+    DocumentMutation mutation = MapRDB.newMutation()
+            .delete("nick_name");
+
     table.update(id, mutation);
     table.flush();
     return Response.ok().build();
@@ -122,9 +118,9 @@ public class UserService {
           @PathParam("value") String value) throws IOException {
 
     // The following code will udpate the user document and add/append an interest
-    Mutation mutation = MapRDB.newMutation()
-            .append("interests", Arrays.asList(new Object[]{value}))
-            .build();
+    DocumentMutation mutation = MapRDB.newMutation()
+            .append("interests", Arrays.asList(new Object[]{value}));
+
     table.update(id, mutation);
     table.flush();
 
@@ -139,9 +135,9 @@ public class UserService {
           @PathParam("id") String id) throws IOException {
 
     // The following code will udpate the user document and add/append an interest
-    Mutation mutation = MapRDB.newMutation()
-            .delete("interests")
-            .build();
+    DocumentMutation mutation = MapRDB.newMutation()
+            .delete("interests");
+
     table.update(id, mutation);
     table.flush();
     return Response.accepted().build();
@@ -168,9 +164,9 @@ public class UserService {
     addressAsMap.put("country", address.getCountry());
 
     // The following code will udpate the user document and add/append an interest
-    Mutation mutation = MapRDB.newMutation()
-            .append("addresses", Arrays.asList(new Object[]{addressAsMap}))
-            .build();
+    DocumentMutation mutation = MapRDB.newMutation()
+            .append("addresses", Arrays.asList(new Object[]{addressAsMap}));
+
     table.update(id, mutation);
     table.flush();
 
@@ -186,9 +182,9 @@ public class UserService {
           @PathParam("id") String id) throws IOException {
 
     // The following code will update the user document and add/append an interest
-    Mutation mutation = MapRDB.newMutation()
-            .delete("addresses")
-            .build();
+    DocumentMutation mutation = MapRDB.newMutation()
+            .delete("addresses");
+
     table.update(id, mutation);
     table.flush();
     return Response.ok().build();
@@ -200,14 +196,13 @@ public class UserService {
   @Path("/{id}")
   @ApiOperation(value = "Return one User based on his _id.<br/>This operation shows a simple get by id ")
   public Response getUserById(@PathParam("id") String id) throws IOException {
-    DBDocument record = table.findById(id);
+    Document record = table.findById(id);
 
     if (record == null) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    // TODO: fix to adap to v1)
-    return Response.ok( JSONHelper.toMap(record) ).build();
+    return Response.ok( record.asMap() ).build();
 
   }
 
@@ -226,12 +221,15 @@ public class UserService {
   @ApiOperation(value = "Return all users.<br/> See how to get all document and do a projection")
   public Response getusers() throws Exception {
 
-    List<Map<String, Map>> users = new ArrayList<Map<String, Map>>();
-    try(DocumentStream<DBDocument> stream = table.find("_id", "first_name", "last_name") ) {
-      for (DBDocument document : stream) {
-        users.add(JSONHelper.toMap(document));
-      }
+    List<Map<String, Object>> users = new ArrayList<Map<String, Object>>();
+    DocumentStream rs = table.find();
+    Iterator<Document> itrs = rs.iterator();
+    Document document;
+    while (itrs.hasNext()) {
+      document = itrs.next();
+      users.add(document.asMap());
     }
+    rs.close();
 
     return Response.ok(users).build();
   }
@@ -240,19 +238,23 @@ public class UserService {
   @Path("/by_age/{age}")
   @ApiOperation(value = "Find User by Age.<br/>This operation shows how to query document on a specific field")
   public Response getusersByAge(@PathParam("age") int age) throws Exception {
-    List<Map<String, ObjectMapper>> users = new ArrayList<Map<String, ObjectMapper>>();
+    List<Map<String, Object>> users = new ArrayList<Map<String, Object>>();
 
     // Create a condition
     // here it is a simple equal on a field
-    Condition condition = MapRDB.newCondition()
+    QueryCondition condition = MapRDB.newCondition()
             .is("age", EQUAL, age)
             .build();
 
-    try(DocumentStream<DBDocument> stream = table.find(condition) ) {
-      for (DBDocument document : stream) {
-        users.add(JSONHelper.toMap(document));
-      }
+    DocumentStream rs = table.find(condition);
+    Iterator<Document> itrs = rs.iterator();
+    Document document;
+    while (itrs.hasNext()) {
+      document = itrs.next();
+      users.add(document.asMap());
     }
+    rs.close();
+
     return Response.ok(users).build();
 
   }
@@ -263,23 +265,26 @@ public class UserService {
   @ApiOperation(value = "Find User by Interest.<br/>This operation shows how to query document on a specific field")
   public Response getusersByAge(@PathParam("interest") String interest) throws Exception {
 
-    List<Map<String, Map>> users = new ArrayList<Map<String, Map>>();
+    List<Map<String, Object>> users = new ArrayList<Map<String, Object>>();
     List<String> results = new ArrayList<String>();
 
     // Create a condition
     // here it is a simple equal on a field OR a list
-    Condition condition = MapRDB.newCondition()
+    QueryCondition condition = MapRDB.newCondition()
             .or()
             .is("interests[]", EQUAL, interest) //  search in case it is an array
             .is("interests", EQUAL, interest) // search in case it is a scalar
             .close()
             .build();
 
-    try(DocumentStream<DBDocument> stream = table.find(condition) ) {
-      for (DBDocument document : stream) {
-        users.add(JSONHelper.toMap(document));
-      }
+    DocumentStream rs = table.find(condition);
+    Iterator<Document> itrs = rs.iterator();
+    Document document;
+    while (itrs.hasNext()) {
+      document = itrs.next();
+      users.add(document.asMap());
     }
+    rs.close();
 
     return Response.ok(users).build();
 

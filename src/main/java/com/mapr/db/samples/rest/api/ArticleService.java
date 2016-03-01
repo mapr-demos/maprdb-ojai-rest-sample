@@ -1,17 +1,15 @@
 package com.mapr.db.samples.rest.api;
 
-import com.mapr.db.Condition;
-import com.mapr.db.DBDocument;
 import com.mapr.db.MapRDB;
-import com.mapr.db.Mutation;
 import com.mapr.db.Table;
-import com.mapr.db.samples.rest.helper.JSONHelper;
 import com.mapr.db.samples.rest.helper.MaprDBHelper;
 import com.mapr.db.samples.rest.model.Article;
 import com.wordnik.swagger.annotations.Api;
 import com.wordnik.swagger.annotations.ApiOperation;
 import org.ojai.Document;
 import org.ojai.DocumentStream;
+import org.ojai.store.DocumentMutation;
+import org.ojai.store.QueryCondition;
 
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
@@ -34,7 +32,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import static com.mapr.db.Condition.Op.EQUAL;
+import static org.ojai.store.QueryCondition.Op.EQUAL;
 
 @Api(value = "/articles", description = "API for Articles")
 @Path("/articles")
@@ -54,12 +52,12 @@ public class ArticleService {
   @Consumes(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Create an article")
   public Response createCustomer(Article article) throws IOException, URISyntaxException {
-    // TODO: use POJO when API supports it
+
     Document record = MapRDB.newDocument(article);
     table.insertOrReplace(record);
     table.flush();
 
-    return Response.created(new URI("/api/articles/" + ((DBDocument)record).getIdString())).build();
+    return Response.created(new URI("/api/articles/" + ((Document)record).getIdString())).build();
   }
 
 
@@ -67,12 +65,21 @@ public class ArticleService {
   @Path("/")
   @ApiOperation(value = "Return all articles.<br/> See how to get all document")
   public Response getArticles() throws Exception {
-    List<Map<String, Map>> items = new ArrayList<Map<String, Map>>();
-    try(DocumentStream<DBDocument> stream = table.find() ) {
-      for (DBDocument document : stream) {
-        items.add(JSONHelper.toMap(document));
-      }
+    List<Map<String, Object>> items = new ArrayList<Map<String, Object>>();
+    DocumentStream rs = table.find();
+    Iterator<Document> itrs = rs.iterator();
+    Document document;
+    while (itrs.hasNext()) {
+      document = itrs.next();
+
+      // TODO : due to https://github.com/ojai/ojai/issues/10
+      removeEmptyArray(document,"tags");
+
+
+      items.add(document.asMap());
     }
+    rs.close();
+
     return Response.ok(items).build();
   }
 
@@ -81,14 +88,16 @@ public class ArticleService {
   @Path("/{id}")
   @ApiOperation(value = "Return one Article based on his _id.<br/>This operation shows a simple get by id ")
   public Response getArticleById(@PathParam("id") String id) throws IOException {
-    DBDocument record = table.findById(id);
+    Document record = table.findById(id);
 
     if (record == null) {
       return Response.status(Response.Status.NOT_FOUND).build();
     }
 
-    // TODO: fix to adap to v1)
-    return Response.ok( JSONHelper.toMap(record) ).build();
+    // TODO : due to https://github.com/ojai/ojai/issues/10
+    removeEmptyArray(record, "tags");
+
+    return Response.ok( record.asMap() ).build();
 
   }
 
@@ -109,9 +118,9 @@ public class ArticleService {
           @PathParam("value") String value) throws IOException {
 
     // The following code will udpate the customer document and add/append an interest
-    Mutation mutation = MapRDB.newMutation()
-            .append("tags", Arrays.asList(new Object[]{value}))
-            .build();
+    DocumentMutation mutation = MapRDB.newMutation()
+            .append("tags", Arrays.asList(new Object[]{value}));
+
     table.update(id, mutation);
     table.flush();
 
@@ -125,9 +134,8 @@ public class ArticleService {
   @Consumes(MediaType.APPLICATION_JSON)
   @ApiOperation(value = "Like this article.<br/> This show how you can store dynamic content (Map)")
   public Response likeThisArticle(@PathParam("id") String id, Map likeAsMap) throws IOException, URISyntaxException {
-    // TODO: use POJO when API supports it
 
-    Mutation mutation = MapRDB.newMutation()
+    DocumentMutation mutation = MapRDB.newMutation()
                                 .increment("likes", 1);
 
     Timestamp ts =  new Timestamp( (new java.util.Date()).getTime()  );
@@ -142,7 +150,6 @@ public class ArticleService {
       newLike.put( "dateOfLike", ts );
       mutation.append("likes_record", Arrays.asList(newLike));
     }
-    mutation.build();
 
     table.update(id, mutation);
     table.flush();
@@ -156,27 +163,42 @@ public class ArticleService {
   @ApiOperation(value = "Find Articles by Tag.<br/>This operation shows how to query document on a specific field")
   public Response getArticlesByTag(@PathParam("tag") String tag) throws Exception {
 
-    List<Map<String, Map>> articles = new ArrayList<Map<String, Map>>();
+    List<Map<String, Object>> articles = new ArrayList<Map<String, Object>>();
 
     // Create a condition
     // here it is a simple equal on a field OR a list
-    Condition condition = MapRDB.newCondition()
+    QueryCondition condition = MapRDB.newCondition()
             .or()
             .is("tags[]", EQUAL, tag) //  search in case it is an array
             .is("tags", EQUAL, tag) // search in case it is a scalar
             .close()
             .build();
-    try(DocumentStream<DBDocument> stream = table.find(condition) ) {
-      for (DBDocument document : stream) {
-        articles.add(JSONHelper.toMap(document));
-      }
-    }
 
+    DocumentStream rs = table.find(condition);
+    Iterator<Document> itrs = rs.iterator();
+    Document document;
+    while (itrs.hasNext()) {
+      document = itrs.next();
+      articles.add(document.asMap());
+    }
+    rs.close();
 
     return Response.ok(articles).build();
 
   }
 
+
+  /**
+   * TODO : remove once Ojai is fixed
+   *  Due to   https://github.com/ojai/ojai/issues/10
+   * @param doc
+   * @param fieldName
+   */
+  private void removeEmptyArray(Document doc, String fieldName) {
+    if (doc.getList(fieldName).isEmpty()) {
+      doc.delete(fieldName);
+    }
+  }
 
 
 }

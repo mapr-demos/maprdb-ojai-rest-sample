@@ -4,12 +4,6 @@ package com.mapr.db.samples.rest.model;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-/**
- * TODO : see why in this application the @JSON are not working properly
- * and rename the attributes
- */
-
-
 public class User {
 
   private String id = null;

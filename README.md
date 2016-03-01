@@ -13,7 +13,7 @@ It contains:
 
 * Java SDK 7 or newer
 * Maven 3
-* MapR-DB JSON Developer Preview VM
+* MapR 5.1 Sandbox or Cluster
 
 In your MapR-DB environment, using a terminal, create the following folder, and change the permissions: 
 
