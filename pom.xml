@@ -9,6 +9,14 @@
     <version>1.1-SNAPSHOT</version>
 
 
+    <properties>
+        <mapr.version>5.2.0-mapr</mapr.version>
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <swagger.version></swagger.version>
+
+    </properties>
+
     <repositories>
 
         <repository>
@@ -74,11 +82,11 @@
           <version>1.3.2</version>
         </dependency>
 
-        <dependency>
+        <!--dependency>
             <groupId>org.assertj</groupId>
             <artifactId>assertj-core</artifactId>
             <version>1.5.0</version>
-        </dependency>
+        </dependency-->
 
         <dependency>
             <groupId>junit</groupId>
@@ -106,7 +114,7 @@
         <dependency>
           <groupId>com.mapr.db</groupId>
           <artifactId>maprdb</artifactId>
-          <version>5.1.0-mapr</version>
+          <version>${mapr.version}</version>
         </dependency>
 
     </dependencies>
@@ -155,8 +163,4 @@
 
     </build>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <swagger.version></swagger.version>
-    </properties>
 </project>
