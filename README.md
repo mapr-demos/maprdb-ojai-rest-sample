@@ -1,6 +1,6 @@
 # MapR-DB REST Application
 
-This project shows how to integrate MapR-DB JSON and Java wit the OJAI API to build a REST Application.
+This project shows how to integrate MapR-DB JSON and Java with the OJAI API to build a REST Application.
 
 It contains:
 
