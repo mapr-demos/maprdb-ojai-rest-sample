@@ -1,3 +1,8 @@
+# ARCHIVED CODE - NO MAINTENANCE
+
+This code has been archived due to the difficulty in maintaining a secure code base with npm as a dependency. Please do not use it 
+as is in your code.
+
 # MapR-DB REST Application
 
 This project shows how to integrate MapR-DB JSON and Java with the OJAI API to build a REST Application.
